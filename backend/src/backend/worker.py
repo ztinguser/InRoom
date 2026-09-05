@@ -8,6 +8,7 @@ logger = logging.getLogger(__name__)
 
 def main() -> None:
     settings = Settings()
+    settings.validate_production()
     setup_logging(settings.log_level)
 
     logger.info("Worker initialized, environment=%s", settings.app_env)

@@ -13,6 +13,7 @@ logger = logging.getLogger(__name__)
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     settings = Settings()
+    settings.validate_production()
     setup_logging(settings.log_level)
 
     app.state.settings = settings
