@@ -1,0 +1,22 @@
+# 本地文档
+/docs/
+
+# 编辑器配置
+.idea/
+.vscode/
+
+# 密钥与本地环境
+.env
+.env.*
+!.env.example
+
+# Python 生成文件
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+build/
+dist/
