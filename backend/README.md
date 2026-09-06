@@ -1,6 +1,18 @@
 # InRoom 后端
 
-当前包含 FastAPI 基础服务、Worker 入口，以及 DeepSeek、Qwen TTS 和 Fun-ASR 接入探针。尚未实现面试业务、数据库和后台任务处理。
+当前包含 FastAPI 服务、数据库模型与事务基础、身份及准备工作区接口、Worker 入口，以及 DeepSeek、Qwen TTS 和 Fun-ASR 接入探针。Part 02 数据库迁移与真实 OIDC 登录尚待验收；面试业务和后台任务处理尚未实现。
+
+## 代码组织
+
+`src/backend/api.py` 只负责组装应用，`worker.py` 是 Worker 入口。其余代码按职责分包：
+
+- `core/`：配置、日志、应用异常、HTTP 配置及资源生命周期。
+- `db/`：表模型、请求级数据库事务。
+- `auth/`：身份依赖、登录业务及登录路由。
+- `preparations/`：工作区请求结构、数据库操作及路由。
+- `probes/`：独立接入探针及当前探针使用的发音替换。
+
+路由处理 HTTP，数据库事务由 `db/session.py` 统一提交或回滚。新增功能放入所属业务包，不继续堆入入口文件。
 
 ## 安装与配置
 
@@ -33,10 +45,19 @@ if (-not (Test-Path .env)) { Copy-Item .env.example .env }
 | QWEN_TTS_MODEL | 默认 qwen3-tts-vd-realtime-2026-01-15 |
 | QWEN_TTS_VOICE | 为上述模型创建的专属音色 ID |
 | ASR_MODEL | 默认 fun-asr-realtime-2026-02-28 |
+| DATABASE_URL | PostgreSQL 连接地址，使用 postgresql+psycopg 驱动 |
+| APP_ORIGIN | 应用同源地址，本地为 http://127.0.0.1:8000 |
+| SESSION_SECRET | API 必填的 Cookie 签名密钥 |
+| OIDC_ISSUER | OIDC 身份提供方 issuer |
+| OIDC_CLIENT_ID | 身份提供方中的客户端 ID |
+| OIDC_CLIENT_SECRET | 身份提供方中的客户端密钥 |
+| LOGIN_MAX_AGE | 登录有效期秒数，默认 28800 |
 
 当前聊天 Base URL 的形状是 `https://<业务空间ID>.cn-beijing.maas.aliyuncs.com/compatible-mode/v1`，使用控制台提供的实际地址。探针自行追加 `/chat/completions`。
 
 默认开发环境可以不配置云服务凭据，启动健康接口和 Worker 入口。生产环境启动 API 或 Worker 时，检查 `DEEPSEEK_API_KEY`、`DEEPSEEK_URL`、`DASHSCOPE_API_KEY`、`QWEN_TTS_VOICE`，缺失时明确报错，不自动切换为 Mock。配置存在不代表凭据有效，服务可用性需通过真实探针验证。
+
+API 现在还要求设置 `SESSION_SECRET`。可用 `uv run python -c "import secrets; print(secrets.token_urlsafe(32))"` 生成并保存到本地 `.env`。生产 API 还要求 HTTPS 的 `APP_ORIGIN`、`OIDC_ISSUER` 以及 `OIDC_CLIENT_SECRET`。健康检查不连接数据库；使用身份和工作区接口前需要完成迁移及 OIDC 配置。
 
 `.env`、虚拟环境和 `probe-output/` 不提交到 Git；`.env.example` 仅保留无秘密的配置示例。
 

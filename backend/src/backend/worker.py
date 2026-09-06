@@ -1,7 +1,7 @@
 import logging
 
-from backend.config import Settings
-from backend.log import setup_logging
+from backend.core.config import Settings
+from backend.core.log import setup_logging
 
 logger = logging.getLogger(__name__)
 

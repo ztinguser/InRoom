@@ -4,7 +4,7 @@ from pathlib import Path
 
 import httpx
 
-from backend.config import Settings
+from backend.core.config import Settings
 
 
 def main() -> None:

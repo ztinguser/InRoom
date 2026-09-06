@@ -3,7 +3,7 @@ from time import perf_counter
 import httpx
 from pydantic import BaseModel
 
-from backend.config import Settings
+from backend.core.config import Settings
 
 
 class Question(BaseModel):

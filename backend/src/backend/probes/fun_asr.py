@@ -8,7 +8,7 @@ from uuid import uuid4
 
 from websockets.asyncio.client import connect
 
-from backend.config import Settings
+from backend.core.config import Settings
 
 
 async def main(path: Path) -> None:

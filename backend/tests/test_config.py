@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from backend.config import Settings
+from backend.core.config import Settings
 
 
 def test_environment_overrides_env_file(

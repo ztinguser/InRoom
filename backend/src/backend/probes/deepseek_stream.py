@@ -4,7 +4,7 @@ from time import perf_counter
 
 import httpx
 
-from backend.config import Settings
+from backend.core.config import Settings
 
 
 def main(cancel: bool = False) -> None:

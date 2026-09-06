@@ -24,7 +24,17 @@ class Settings(BaseSettings):
 
     asr_model: str = "fun-asr-realtime-2026-02-28"
 
-    # 讨厌的校验
+    database_url: str = "postgresql+psycopg://inroom:inroom@127.0.0.1:5432/inroom"
+
+    app_origin: str = "http://127.0.0.1:8000"
+    session_secret: SecretStr = SecretStr("")
+    login_max_age: int = 8 * 60 * 60
+
+    oidc_issuer: str = "http://127.0.0.1:8080/realms/inroom"
+    oidc_client_id: str = "inroom-backend"
+    oidc_client_secret: SecretStr = SecretStr("")
+
+    # 讨厌的llm校验
     def validate_production(self) -> None:
         if self.app_env != "production":
             return
@@ -39,3 +49,18 @@ class Settings(BaseSettings):
 
         if missing:
             raise RuntimeError(f"生产配置缺失：{', '.join(missing)}")
+
+    # 讨厌的identity校验
+    def validate_identity(self) -> None:
+        if not self.session_secret.get_secret_value():
+            raise RuntimeError("缺少 SESSION_SECRET")
+
+        if self.app_env == "production":
+            if not self.app_origin.startswith("https://"):
+                raise RuntimeError("生产环境 APP_ORIGIN 必须使用 HTTPS")
+
+            if not self.oidc_issuer.startswith("https://"):
+                raise RuntimeError("生产环境 OIDC_ISSUER 必须使用 HTTPS")
+
+            if not self.oidc_client_secret.get_secret_value():
+                raise RuntimeError("缺少 OIDC_CLIENT_SECRET")

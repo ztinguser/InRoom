@@ -7,8 +7,8 @@ from uuid import uuid4
 
 from websockets.sync.client import connect
 
-from backend.config import Settings
-from backend.tts_terms import TTS_REPLACEMENTS
+from backend.core.config import Settings
+from backend.probes.tts_terms import TTS_REPLACEMENTS
 
 
 def prepare_speech_text(text: str) -> str:
