@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.core.errors import AppError
 from backend.jobs.models import Job
+from backend.outbox.repository import add_event
 
 
 async def _get_owned_job(
@@ -53,7 +54,12 @@ async def complete_job(
     job.finished_at = now
     job.locked_by = None
     job.lease_until = None
-    await db.flush()
+
+    await add_event(
+        db,
+        "job.completed",
+        {"job_id": str(job.id)},
+    )
 
 
 async def fail_job(
