@@ -32,3 +32,15 @@ class OutboxEvent(Base):
         DateTime(timezone=True),
     )
     error: Mapped[str | None]
+
+
+class InboxEvent(Base):
+    __tablename__ = "inbox"
+
+    event_id: Mapped[UUID] = mapped_column(primary_key=True)
+    kind: Mapped[str]
+    payload: Mapped[dict[str, Any]] = mapped_column(JSONB)
+    received_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+    )

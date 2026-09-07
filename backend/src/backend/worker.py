@@ -5,7 +5,8 @@ import sys
 
 from backend.core.config import Settings
 from backend.core.log import setup_logging
-from backend.jobs.worker import serve
+from backend.jobs.worker import serve as serve_jobs
+from backend.outbox.worker import serve as serve_outbox
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +22,9 @@ async def start(settings: Settings) -> None:
         sig: signal.signal(sig, request_stop) for sig in (signal.SIGINT, signal.SIGTERM)
     }
     try:
-        await serve(settings, stop)
+        async with asyncio.TaskGroup() as group:
+            group.create_task(serve_jobs(settings, stop))
+            group.create_task(serve_outbox(settings, stop))
     finally:
         for sig, handler in previous.items():
             signal.signal(sig, handler)
