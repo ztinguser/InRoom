@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import create_async_engine
 
 from backend.core.config import Settings
 from backend.db.models import Base
+from backend.jobs.models import Job  # noqa: F401
 
 target_metadata = Base.metadata
 
