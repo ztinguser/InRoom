@@ -9,6 +9,7 @@ from backend.core.config import Settings
 from backend.db.models import Base
 from backend.jobs.models import Job  # noqa: F401
 from backend.outbox.models import OutboxEvent  # noqa: F401
+from backend.preparations.models import ResumeAsset  # noqa: F401
 
 target_metadata = Base.metadata
 

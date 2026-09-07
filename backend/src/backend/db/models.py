@@ -20,6 +20,9 @@ class User(Base):
 
 class Preparation(Base):
     __tablename__ = "preparations"
+    __table_args__ = (
+        UniqueConstraint("id", "owner_id", name="uq_preparations_id_owner"),
+    )
 
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
     owner_id: Mapped[UUID] = mapped_column(
