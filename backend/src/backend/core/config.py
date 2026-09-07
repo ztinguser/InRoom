@@ -33,6 +33,8 @@ class Settings(BaseSettings):
     oidc_issuer: str = "http://127.0.0.1:8080/realms/inroom"
     oidc_client_id: str = "inroom-backend"
     oidc_client_secret: SecretStr = SecretStr("")
+    # 不提供开发身份绕过；显式拒绝误配，避免部署者以为开关生效。
+    dev_identity_enabled: bool = False
 
     # 讨厌的llm校验
     def validate_production(self) -> None:
@@ -52,6 +54,8 @@ class Settings(BaseSettings):
 
     # 讨厌的identity校验
     def validate_identity(self) -> None:
+        if self.dev_identity_enabled:
+            raise RuntimeError("不支持开发身份绕过，请使用 OIDC 登录")
         if not self.session_secret.get_secret_value():
             raise RuntimeError("缺少 SESSION_SECRET")
 

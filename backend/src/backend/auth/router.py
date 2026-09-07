@@ -2,9 +2,9 @@ import secrets
 from uuid import UUID
 
 from authlib.integrations.base_client.errors import OAuthError
-from authlib.jose.errors import JoseError
 from fastapi import APIRouter, Request
 from fastapi.responses import RedirectResponse
+from joserfc.errors import JoseError
 
 from backend.auth.dependencies import CurrentUser
 from backend.auth.service import create_login, revoke_login

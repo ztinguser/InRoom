@@ -11,6 +11,25 @@ jobs:
   check:
     runs-on: ubuntu-24.04
 
+    services:
+      postgres:
+        image: postgres:17.6
+        env:
+          POSTGRES_USER: inroom
+          POSTGRES_PASSWORD: inroom
+          POSTGRES_DB: inroom_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U inroom -d inroom_test"
+          --health-interval 3s
+          --health-timeout 3s
+          --health-retries 20
+
+    env:
+      TEST_DATABASE_URL: postgresql+psycopg://inroom:inroom@127.0.0.1:5432/inroom_test
+      RUN_OIDC_TESTS: "1"
+
     defaults:
       run:
         working-directory: backend
@@ -29,14 +48,30 @@ jobs:
       - name: Install dependencies
         run: uv sync --locked
 
+      - name: Start local OIDC provider
+        run: |
+          docker run --detach --name inroom-keycloak \
+            --publish 127.0.0.1:8080:8080 \
+            --env KC_BOOTSTRAP_ADMIN_USERNAME=admin \
+            --env KC_BOOTSTRAP_ADMIN_PASSWORD=admin \
+            quay.io/keycloak/keycloak:26.7.3 start-dev
+          for attempt in $(seq 1 60); do
+            if curl --fail --silent http://127.0.0.1:8080/realms/master/.well-known/openid-configuration > /dev/null; then
+              exit 0
+            fi
+            sleep 2
+          done
+          docker logs inroom-keycloak
+          exit 1
+
       - name: Lint
-        run: uv run --locked ruff check src tests
+        run: uv run --locked ruff check src tests migrations
 
       - name: Check formatting
-        run: uv run --locked ruff format --check src tests
+        run: uv run --locked ruff format --check src tests migrations
 
       - name: Type check
-        run: uv run --locked mypy src
+        run: uv run --locked mypy src migrations
 
       - name: Test
-        run: uv run --locked pytest -q
+        run: uv run --locked pytest -q --tb=short
