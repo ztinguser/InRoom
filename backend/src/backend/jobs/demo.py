@@ -1,8 +1,8 @@
+import argparse
 import asyncio
 import sys
-from uuid import uuid4
+from uuid import UUID, uuid4
 
-from sqlalchemy import select
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 from backend.core.config import Settings
@@ -11,7 +11,7 @@ from backend.jobs.models import Job
 from backend.jobs.repository import create_job
 
 
-async def main() -> None:
+async def main(owner_id: UUID) -> None:
     settings = Settings()
     if settings.app_env != "development":
         raise RuntimeError("演示命令只用于开发环境")
@@ -21,9 +21,10 @@ async def main() -> None:
 
     try:
         async with sessions.begin() as db:
-            owner_id = await db.scalar(select(User.id).limit(1))
-            if owner_id is None:
-                raise RuntimeError("开发库没有用户，请先登录一次")
+            if await db.get(User, owner_id) is None:
+                raise RuntimeError(
+                    "当前数据库中没有该用户，请使用 /auth/me 返回的 user_id"
+                )
 
             job = await create_job(
                 db,
@@ -35,6 +36,8 @@ async def main() -> None:
             job_id = job.id
 
         print(f"任务已提交：{job_id}")
+        print(f"所属用户：{owner_id}")
+        print(f"查询地址：{settings.app_origin}/jobs/{job_id}")
 
         for _ in range(30):
             async with sessions() as db:
@@ -56,7 +59,12 @@ async def main() -> None:
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="为指定开发用户创建演示任务")
+    parser.add_argument(
+        "--owner-id", type=UUID, required=True, help="/auth/me 返回的 user_id"
+    )
+    args = parser.parse_args()
     asyncio.run(
-        main(),
+        main(args.owner_id),
         loop_factory=asyncio.SelectorEventLoop if sys.platform == "win32" else None,
     )

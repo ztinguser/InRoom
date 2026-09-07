@@ -47,3 +47,19 @@ async def create_job(
             "相同任务标识不能使用不同参数",
         )
     return existing
+
+
+async def get_job(
+    db: AsyncSession,
+    owner_id: UUID,
+    job_id: UUID,
+) -> Job:
+    job = await db.scalar(
+        select(Job).where(
+            Job.id == job_id,
+            Job.owner_id == owner_id,
+        )
+    )
+    if job is None:
+        raise AppError(404, "NOT_FOUND", "任务不存在")
+    return job
