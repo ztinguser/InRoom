@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from backend.core.config import Settings
 from backend.jobs.claiming import claim_job
 from backend.jobs.handlers import HANDLERS
+from backend.jobs.health import touch_worker
 from backend.jobs.runner import run_job
 
 logger = logging.getLogger(__name__)
@@ -31,6 +32,7 @@ async def serve(settings: Settings, stop: asyncio.Event) -> None:
         while not stop.is_set():
             try:
                 async with sessions.begin() as db:
+                    await touch_worker(db, worker_id)
                     job = await claim_job(db, worker_id, kinds)
 
                 if job is not None:

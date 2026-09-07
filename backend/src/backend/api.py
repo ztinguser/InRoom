@@ -4,6 +4,7 @@ from backend.auth.router import router as auth_router
 from backend.core.config import Settings
 from backend.core.http import configure_http
 from backend.core.lifespan import lifespan
+from backend.jobs.health import router as worker_health_router
 from backend.jobs.router import router as jobs_router
 from backend.preparations.router import router as preparations_router
 
@@ -22,6 +23,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(auth_router)
     app.include_router(preparations_router)
     app.include_router(jobs_router)
+    app.include_router(worker_health_router)
     return app
 
 

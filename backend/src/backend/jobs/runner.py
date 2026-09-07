@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from backend.core.errors import AppError
 from backend.jobs.handlers import Handler
+from backend.jobs.health import touch_worker
 from backend.jobs.models import Job
 from backend.jobs.results import complete_job, fail_job, renew_job
 
@@ -19,6 +20,7 @@ async def _heartbeat(
     while True:
         async with sessions.begin() as db:
             await renew_job(db, job.id, worker_id, job.fencing_token)
+            await touch_worker(db, worker_id)
         await asyncio.sleep(10)
 
 
