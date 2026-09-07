@@ -13,9 +13,9 @@ from backend.db.models import LoginSession
 
 def test_owner_isolation(users):
     alice, bob = users
-    created = alice.post("/v1/preparations")
+    created = alice.post("/preparations")
     assert created.status_code == 201
-    path = f"/v1/preparations/{created.json()['id']}"
+    path = f"/preparations/{created.json()['id']}"
     assert alice.get(path).status_code == 200
     assert bob.get(path).status_code == 404
     assert (
@@ -28,7 +28,7 @@ def test_owner_isolation(users):
 def test_anonymous_and_invalid_cookie(server):
     with httpx.Client(base_url=server["origin"]) as client:
         assert client.get("/auth/me").status_code == 401
-        assert client.post("/v1/preparations").status_code == 401
+        assert client.post("/preparations").status_code == 401
         client.cookies.set("inroom_session", "forged-cookie")
         assert client.get("/auth/me").status_code == 401
 
@@ -52,15 +52,15 @@ def test_csrf_origin(users, server, origin, csrf):
         headers["Origin"] = server["origin"] if origin == "same" else origin
     if csrf is not None:
         headers["X-CSRF-Token"] = csrf
-    response = alice.post("/v1/preparations", headers=headers)
+    response = alice.post("/preparations", headers=headers)
     assert response.status_code == 403
     assert response.json()["code"] == "FORBIDDEN"
 
 
 def test_concurrent_version_conflict(users):
     alice, _ = users
-    created = alice.post("/v1/preparations").json()
-    path = f"/v1/preparations/{created['id']}"
+    created = alice.post("/preparations").json()
+    path = f"/preparations/{created['id']}"
     barrier = Barrier(2)
 
     def cancel():
@@ -110,7 +110,7 @@ def test_logout_revokes_cookie(users, database):
 
 def test_error_shape(users):
     alice, _ = users
-    response = alice.get("/v1/preparations/not-a-uuid")
+    response = alice.get("/preparations/not-a-uuid")
     assert response.status_code == 422
     body = response.json()
     assert set(body) == {"code", "message", "request_id"}

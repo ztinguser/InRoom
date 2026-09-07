@@ -99,9 +99,9 @@ def test_real_oidc_two_users(server, keycloak, database):
             with httpx.Client(base_url=server["origin"]) as old_session:
                 old_session.cookies.set("inroom_session", old_cookie)
                 assert old_session.get("/auth/me").status_code == 401
-            created = alice.post("/v1/preparations")
+            created = alice.post("/preparations")
             assert created.status_code == 201
-            path = f"/v1/preparations/{created.json()['id']}"
+            path = f"/preparations/{created.json()['id']}"
             assert bob.get(path).status_code == 404
             assert (
                 bob.post(

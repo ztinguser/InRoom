@@ -7,7 +7,7 @@ from backend.db.session import DB
 from backend.preparations import repository
 from backend.preparations.schemas import CancelInput, PreparationOut
 
-router = APIRouter(prefix="/v1/preparations", tags=["preparations"])
+router = APIRouter(prefix="/preparations", tags=["preparations"])
 
 
 @router.post("", response_model=PreparationOut, status_code=201)
