@@ -13,7 +13,9 @@ class Job(Base):
     __tablename__ = "jobs"
     __table_args__ = (
         UniqueConstraint(
-            "owner_id", "kind", "dedupe_key",
+            "owner_id",
+            "kind",
+            "dedupe_key",
             name="uq_jobs_owner_kind_dedupe",
         ),
         Index("ix_jobs_status_available_at", "status", "available_at"),
@@ -21,7 +23,8 @@ class Job(Base):
 
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
     owner_id: Mapped[UUID] = mapped_column(
-        ForeignKey("users.id"), index=True,
+        ForeignKey("users.id"),
+        index=True,
     )
 
     kind: Mapped[str]
@@ -32,7 +35,8 @@ class Job(Base):
     attempts: Mapped[int] = mapped_column(default=0)
     max_attempts: Mapped[int] = mapped_column(default=3)
     available_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now(),
+        DateTime(timezone=True),
+        server_default=func.now(),
     )
 
     locked_by: Mapped[str | None]
@@ -45,7 +49,8 @@ class Job(Base):
     error: Mapped[str | None]
 
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now(),
+        DateTime(timezone=True),
+        server_default=func.now(),
     )
     finished_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True),

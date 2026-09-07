@@ -7,7 +7,9 @@ from sqlalchemy.engine import make_url
 
 
 def test_upgrade_preserves_data_and_failure_rolls_back(
-    database_url, migrate, tmp_path,
+    database_url,
+    migrate,
+    tmp_path,
 ):
     schema = f"migration_test_{uuid4().hex}"
     admin = create_engine(database_url)
@@ -38,9 +40,9 @@ def test_upgrade_preserves_data_and_failure_rolls_back(
             assert db.execute(
                 text("SELECT status, state_version FROM preparations")
             ).one() == ("DRAFT", 1)
-            assert db.execute(
-                text("SELECT to_regclass('jobs')")
-            ).scalar_one() is not None
+            assert (
+                db.execute(text("SELECT to_regclass('jobs')")).scalar_one() is not None
+            )
             current_revision = db.execute(
                 text("SELECT version_num FROM alembic_version")
             ).scalar_one()
@@ -52,7 +54,9 @@ def test_upgrade_preserves_data_and_failure_rolls_back(
         source = Path(__file__).resolve().parents[2] / "migrations"
         scripts = tmp_path / "migrations"
         shutil.copytree(
-            source, scripts, ignore=shutil.ignore_patterns("__pycache__"),
+            source,
+            scripts,
+            ignore=shutil.ignore_patterns("__pycache__"),
         )
         config = tmp_path / "alembic.ini"
         config.write_text(
@@ -73,15 +77,17 @@ def test_upgrade_preserves_data_and_failure_rolls_back(
         assert failed.returncode != 0
 
         with engine.connect() as db:
-            assert db.execute(
-                text("SELECT version_num FROM alembic_version")
-            ).scalar_one() == current_revision
-            assert db.execute(
-                text("SELECT to_regclass('partial_write')")
-            ).scalar_one() is None
-            assert db.execute(
-                text("SELECT count(*) FROM preparations")
-            ).scalar_one() == 1
+            assert (
+                db.execute(text("SELECT version_num FROM alembic_version")).scalar_one()
+                == current_revision
+            )
+            assert (
+                db.execute(text("SELECT to_regclass('partial_write')")).scalar_one()
+                is None
+            )
+            assert (
+                db.execute(text("SELECT count(*) FROM preparations")).scalar_one() == 1
+            )
     finally:
         engine.dispose()
         with admin.begin() as db:

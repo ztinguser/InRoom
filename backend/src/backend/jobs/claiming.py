@@ -7,14 +7,24 @@ from backend.jobs.models import Job
 
 
 async def claim_job(
-        db: AsyncSession,
-        worker_id: str,
-        kinds: tuple[str, ...],
-        lease_seconds: int = 30,
+    db: AsyncSession,
+    worker_id: str,
+    kinds: tuple[str, ...],
+    lease_seconds: int = 30,
 ) -> Job | None:
     job = await db.scalar(
         select(Job)
-        .where(Job.kind.in_(kinds),or_(and_(Job.status == "pending",Job.available_at <= func.clock_timestamp()),and_(Job.status == "running",Job.lease_until <= func.clock_timestamp())))
+        .where(
+            Job.kind.in_(kinds),
+            or_(
+                and_(
+                    Job.status == "pending", Job.available_at <= func.clock_timestamp()
+                ),
+                and_(
+                    Job.status == "running", Job.lease_until <= func.clock_timestamp()
+                ),
+            ),
+        )
         .order_by(Job.available_at, Job.id)
         .limit(1)
         .with_for_update(skip_locked=True)

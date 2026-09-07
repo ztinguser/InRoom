@@ -85,17 +85,11 @@ def test_job_creation_and_rollback(database, database_url):
         finally:
             try:
                 async with sessions.begin() as db:
+                    await db.execute(delete(Job).where(Job.owner_id == owner_id))
                     await db.execute(
-                        delete(Job).where(Job.owner_id == owner_id)
+                        delete(Preparation).where(Preparation.owner_id == owner_id)
                     )
-                    await db.execute(
-                        delete(Preparation).where(
-                            Preparation.owner_id == owner_id
-                        )
-                    )
-                    await db.execute(
-                        delete(User).where(User.id == owner_id)
-                    )
+                    await db.execute(delete(User).where(User.id == owner_id))
             finally:
                 await engine.dispose()
 

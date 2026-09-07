@@ -13,7 +13,10 @@ def upgrade() -> None:
         "jobs",
         sa.Column("id", sa.Uuid(), primary_key=True),
         sa.Column(
-            "owner_id", sa.Uuid(), sa.ForeignKey("users.id"), nullable=False,
+            "owner_id",
+            sa.Uuid(),
+            sa.ForeignKey("users.id"),
+            nullable=False,
         ),
         sa.Column("kind", sa.String(), nullable=False),
         sa.Column("payload", postgresql.JSONB(), nullable=False),
@@ -40,13 +43,17 @@ def upgrade() -> None:
         ),
         sa.Column("finished_at", sa.DateTime(timezone=True), nullable=True),
         sa.UniqueConstraint(
-            "owner_id", "kind", "dedupe_key",
+            "owner_id",
+            "kind",
+            "dedupe_key",
             name="uq_jobs_owner_kind_dedupe",
         ),
     )
     op.create_index("ix_jobs_owner_id", "jobs", ["owner_id"])
     op.create_index(
-        "ix_jobs_status_available_at", "jobs", ["status", "available_at"],
+        "ix_jobs_status_available_at",
+        "jobs",
+        ["status", "available_at"],
     )
 
 
