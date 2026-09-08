@@ -13,3 +13,12 @@ class PreparationOut(BaseModel):
 
 class CancelInput(BaseModel):
     expected_state_version: int = Field(ge=1)
+
+
+class ResumeAssetOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    preparation_id: UUID
+    filename: str
+    size_bytes: int

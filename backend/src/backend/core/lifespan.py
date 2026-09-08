@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 from backend.core.config import Settings
 from backend.core.log import setup_logging
+from backend.files.local import LocalObjectStore
 
 logger = logging.getLogger(__name__)
 
@@ -21,6 +22,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 
     engine = create_async_engine(settings.database_url)
     try:
+        app.state.object_store = LocalObjectStore(settings.private_storage_dir)
         app.state.sessions = async_sessionmaker(engine, expire_on_commit=False)
         oauth = OAuth()
         app.state.oidc = oauth.register(

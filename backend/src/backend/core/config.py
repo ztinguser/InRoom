@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import Literal
 
 from pydantic import SecretStr
@@ -25,6 +26,7 @@ class Settings(BaseSettings):
     asr_model: str = "fun-asr-realtime-2026-02-28"
 
     database_url: str = "postgresql+psycopg://inroom:inroom@127.0.0.1:5432/inroom"
+    private_storage_dir: Path = Path("private")
 
     app_origin: str = "http://127.0.0.1:8000"
     session_secret: SecretStr = SecretStr("")
