@@ -7,7 +7,7 @@ class LocalObjectStore:
         self.root = root.resolve()
         self.root.mkdir(parents=True, exist_ok=True)
 
-    def _path(self, key: str) -> Path:
+    def path(self, key: str) -> Path:
         name = UUID(key).hex
         path = (self.root / name).resolve()
         if path.parent != self.root:
@@ -16,7 +16,7 @@ class LocalObjectStore:
 
     def put(self, content: bytes) -> str:
         key = uuid4().hex
-        path = self._path(key)
+        path = self.path(key)
 
         with path.open("xb") as file:
             try:
@@ -29,7 +29,7 @@ class LocalObjectStore:
         return key
 
     def get(self, key: str) -> bytes:
-        return self._path(key).read_bytes()
+        return self.path(key).read_bytes()
 
     def delete(self, key: str) -> None:
-        self._path(key).unlink(missing_ok=True)
+        self.path(key).unlink(missing_ok=True)
